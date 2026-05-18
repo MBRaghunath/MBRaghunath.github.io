@@ -4,8 +4,9 @@ body{background:#000;overflow:hidden;font-family:monospace}
 canvas{display:block;position:fixed;top:0;left:0}
 #flash{position:fixed;inset:0;background:#f00;opacity:0;pointer-events:none;transition:opacity .12s;z-index:200}
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;color:#fff}
-#overlay h1{font-size:clamp(1.6rem,5vw,2.8rem);color:#0ff;letter-spacing:5px;margin-bottom:6px;text-shadow:0 0 30px rgba(0,255,255,.4)}
-#overlay .sub{color:#555;font-size:12px;margin-bottom:22px}
+#overlay h1{font-size:clamp(1.6rem,5vw,2.8rem);color:#0ff;letter-spacing:5px;margin-bottom:6px;text-shadow:0 0 30px rgba(0,255,255,.35)}
+#overlay .sub{color:#555;font-size:12px;margin-bottom:10px}
+#safariWarn{background:rgba(255,120,0,.12);border:1px solid rgba(255,120,0,.4);color:#fa0;font-size:11px;padding:7px 14px;margin-bottom:14px;display:none}
 .mrow{display:flex;gap:12px;margin-bottom:20px}
 .mbtn{padding:12px 26px;font-size:16px;font-family:monospace;border:1.5px solid #0ff;background:transparent;color:#0ff;cursor:pointer;transition:all .15s;letter-spacing:1px}
 .mbtn:hover,.mbtn.on{background:#0ff;color:#000}
@@ -23,10 +24,11 @@ canvas{display:block;position:fixed;top:0;left:0}
 #thrfill{position:absolute;bottom:0;width:100%;background:#0ff;transition:height .06s}
 #xh{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:18px;height:18px;border:1.5px solid rgba(0,255,255,.4);border-radius:50%}
 #stallw{position:absolute;top:calc(50% + 22px);left:50%;transform:translateX(-50%);color:#f80;font-size:13px;display:none;letter-spacing:1px}
+#armw{position:absolute;top:calc(50% + 22px);left:50%;transform:translateX(-50%);color:#ff0;font-size:12px;display:none;letter-spacing:1px;text-align:center}
 .hbc{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:10px;color:#2a2a2a}
 #sptoggle{position:fixed;top:10px;right:10px;background:rgba(0,0,0,.7);border:1px solid #222;color:#444;font-family:monospace;font-size:11px;padding:5px 10px;cursor:pointer;z-index:51;display:none}
 #sptoggle:hover{border-color:#0ff;color:#0ff}
-#spanel{position:fixed;top:0;right:0;width:260px;height:100%;background:rgba(0,0,0,.9);color:#ccc;font-family:monospace;font-size:11px;padding:14px;z-index:50;display:none;border-left:1px solid #1a1a1a;overflow-y:auto}
+#spanel{position:fixed;top:0;right:0;width:260px;height:100%;background:rgba(0,0,0,.92);color:#ccc;font-family:monospace;font-size:11px;padding:14px;z-index:50;display:none;border-left:1px solid #1a1a1a;overflow-y:auto}
 #spanel h2{color:#0ff;font-size:12px;margin-bottom:14px;letter-spacing:1px}
 .sr{margin-bottom:10px}
 .sr label{display:block;color:#666;margin-bottom:3px}
@@ -35,14 +37,15 @@ canvas{display:block;position:fixed;top:0;left:0}
 #adbg{margin-top:12px;color:#333;font-size:10px;white-space:pre;line-height:1.6;min-height:64px}
 .cpanel{margin-top:10px;width:100%;padding:6px;font-family:monospace;background:transparent;border:1px solid #222;color:#555;cursor:pointer;font-size:11px}
 .cpanel:hover{border-color:#0ff;color:#0ff}
-#crashed{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#f00;font-size:18px;letter-spacing:3px;display:none}
+#crashlbl{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#f44;font-size:18px;letter-spacing:3px;display:none}
 </style>
 
 <div id="flash"></div>
 
 <div id="overlay">
   <h1>FPV OPEN WORLD</h1>
-  <div class="sub">Open world · Radiomaster Pocket ready · No lap times · Just fly</div>
+  <div class="sub">Open world · Radiomaster Pocket ready · Just fly</div>
+  <div id="safariWarn">⚠ Safari does not support the Gamepad API — use Chrome or Firefox for controller support</div>
   <div id="cstat" class="disc">⚡ Connect Radiomaster → USB Joystick mode → press a stick</div>
   <div class="mrow">
     <button class="mbtn on" id="bd" onclick="setMode('drone')">DRONE</button>
@@ -50,7 +53,7 @@ canvas{display:block;position:fixed;top:0;left:0}
   </div>
   <button class="gbtn" onclick="startGame()">▶  FLY</button>
   <div class="kh">
-    SPACE / SHIFT = throttle &nbsp;·&nbsp; W S = pitch &nbsp;·&nbsp; A D = roll &nbsp;·&nbsp; Q E = yaw<br>
+    SPACE / SHIFT = throttle up / down &nbsp;·&nbsp; W S = pitch &nbsp;·&nbsp; A D = roll &nbsp;·&nbsp; Q E = yaw<br>
     R = respawn &nbsp;·&nbsp; TAB = controller map &nbsp;·&nbsp; ESC = menu
   </div>
 </div>
@@ -66,7 +69,8 @@ canvas{display:block;position:fixed;top:0;left:0}
   <div id="thrbar"><div id="thrfill"></div></div>
   <div id="xh"></div>
   <div id="stallw">⚠ STALL</div>
-  <div id="crashed">CRASHED</div>
+  <div id="armw">LOWER THROTTLE TO ARM</div>
+  <div id="crashlbl">CRASHED</div>
   <div class="hbc">R=Respawn · ESC=Menu · TAB=Settings</div>
 </div>
 
@@ -74,6 +78,7 @@ canvas{display:block;position:fixed;top:0;left:0}
 
 <div id="spanel">
   <h2>CONTROLLER MAP</h2>
+  <div style="color:#555;font-size:10px;margin-bottom:12px;line-height:1.6">Move each stick and watch axis values below to find the right numbers. Radiomaster defaults: Thr=2 Yaw=3 Pit=1 Rol=0</div>
   <div class="sr"><label>Throttle axis <b id="lthr">2</b></label>
     <input type="range" min="0" max="7" step="1" value="2" oninput="axm.thr=+this.value;document.getElementById('lthr').textContent=this.value">
   </div>
@@ -86,7 +91,7 @@ canvas{display:block;position:fixed;top:0;left:0}
   <div class="sr"><label>Roll axis <b id="lrol">0</b></label>
     <input type="range" min="0" max="7" step="1" value="0" oninput="axm.rol=+this.value;document.getElementById('lrol').textContent=this.value">
   </div>
-  <div class="sr"><label>Invert throttle &nbsp;<input type="checkbox" id="ithr" checked onchange="axm.invT=this.checked"></label></div>
+  <div class="sr"><label>Invert throttle &nbsp;<input type="checkbox" id="ithr" onchange="axm.invT=this.checked"></label></div>
   <div class="sr"><label>Invert pitch &nbsp;<input type="checkbox" id="ipit" onchange="axm.invP=this.checked"></label></div>
   <div class="sr"><label>Deadzone <b id="ldz">0.05</b></label>
     <input type="range" min="0" max="0.3" step="0.01" value="0.05" oninput="DZ=+this.value;document.getElementById('ldz').textContent=this.value">
@@ -100,8 +105,13 @@ canvas{display:block;position:fixed;top:0;left:0}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+// Safari warning
+if(/^((?!chrome|android).)*safari/i.test(navigator.userAgent)){
+  document.getElementById('safariWarn').style.display='block';
+}
+
 var MODE='drone', running=false, DZ=0.05, SENS=1.0;
-var axm={thr:2,yaw:3,pit:1,rol:0,invT:true,invP:false};
+var axm={thr:2,yaw:3,pit:1,rol:0,invT:false,invP:false};
 var gpIdx=-1;
 var C;
 
@@ -165,10 +175,12 @@ var tmesh=new THREE.Mesh(tgeo,new THREE.MeshLambertMaterial({vertexColors:true})
 tmesh.receiveShadow=true;
 scene.add(tmesh);
 
-scene.add(new THREE.Mesh(
+var waterMesh=new THREE.Mesh(
   new THREE.PlaneGeometry(2400,2400).rotateX(-Math.PI/2),
   new THREE.MeshLambertMaterial({color:0x1a5888,transparent:true,opacity:.72})
-)).position.y=-3.5;
+);
+waterMesh.position.y=-3.5;
+scene.add(waterMesh);
 
 var trkM=new THREE.MeshLambertMaterial({color:0x5c3d1e});
 var lfM=[
@@ -259,22 +271,23 @@ function mkDrone(){
   g.add(new THREE.Mesh(new THREE.BoxGeometry(2.4,.6,2.4),bm));
   var cp=new THREE.Mesh(new THREE.BoxGeometry(1.3,.08,1.3),new THREE.MeshLambertMaterial({color:0x1a1a1a}));
   cp.position.y=.34;g.add(cp);
-  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(a){
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(a2){
     var arm=new THREE.Mesh(new THREE.BoxGeometry(2.9,.17,.3),am);
-    arm.rotation.y=a[0]===a[1]?-Math.PI/4:Math.PI/4;
-    arm.position.set(a[0]*1.2,0,a[1]*1.2);g.add(arm);
+    arm.rotation.y=a2[0]===a2[1]?-Math.PI/4:Math.PI/4;
+    arm.position.set(a2[0]*1.2,0,a2[1]*1.2);g.add(arm);
     var rot=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,.06,12),rm);
-    rot.position.set(a[0]*2.35,.32,a[1]*2.35);rot.userData.R=1;g.add(rot);
+    rot.position.set(a2[0]*2.35,.32,a2[1]*2.35);rot.userData.R=1;g.add(rot);
     var mb=new THREE.Mesh(new THREE.CylinderGeometry(.32,.28,.5,8),am);
-    mb.position.set(a[0]*2.35,.12,a[1]*2.35);g.add(mb);
+    mb.position.set(a2[0]*2.35,.12,a2[1]*2.35);g.add(mb);
   });
+  // FPV cam faces -Z (forward)
   var fc=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.32),new THREE.MeshLambertMaterial({color:0xff9900}));
-  fc.position.set(0,.12,1.28);g.add(fc);
+  fc.position.set(0,.12,-1.28);g.add(fc);
   var rl=new THREE.Mesh(new THREE.SphereGeometry(.1,5,4),new THREE.MeshLambertMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:1}));
-  rl.position.set(-.8,-.35,1);g.add(rl);
+  rl.position.set(-.8,-.35,-1);g.add(rl);
   var gl2=rl.clone();
   gl2.material=new THREE.MeshLambertMaterial({color:0x00ff00,emissive:0x00ff00,emissiveIntensity:1});
-  gl2.position.set(.8,-.35,1);g.add(gl2);
+  gl2.position.set(.8,-.35,-1);g.add(gl2);
   return g;
 }
 
@@ -282,43 +295,59 @@ function mkPlane(){
   var g=new THREE.Group();
   var fm=new THREE.MeshLambertMaterial({color:0xcc2020});
   var wm=new THREE.MeshLambertMaterial({color:0xdd3030});
-  var fuse=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.6,9),fm);g.add(fuse);
+  // Fuselage centred at origin
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.8,1.6,9),fm));
+  // Nose cone points in -Z (forward)
   var nose=new THREE.Mesh(new THREE.ConeGeometry(.7,2,8),fm);
-  nose.rotation.x=Math.PI/2;nose.position.set(0,0,5.5);g.add(nose);
-  var wing=new THREE.Mesh(new THREE.BoxGeometry(18,.26,3.5),wm);g.add(wing);
+  nose.rotation.x=-Math.PI/2;
+  nose.position.set(0,0,-5.5);g.add(nose);
+  // Main wings
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(18,.26,3.5),wm));
+  // Wing tips with dihedral
   [-1,1].forEach(function(s){
     var wt=new THREE.Mesh(new THREE.BoxGeometry(4,.2,2.5),wm);
     wt.position.set(s*9.5,.45,0);wt.rotation.z=s*-.18;g.add(wt);
   });
-  var ht2=new THREE.Mesh(new THREE.BoxGeometry(7,.22,2.2),wm);
-  ht2.position.set(0,0,-4.8);g.add(ht2);
-  var vt=new THREE.Mesh(new THREE.BoxGeometry(.22,3.2,2.2),wm);
-  vt.position.set(0,1.4,-4.8);g.add(vt);
+  // Tail at +Z (rear)
+  var htail=new THREE.Mesh(new THREE.BoxGeometry(7,.22,2.2),wm);
+  htail.position.set(0,0,4.8);g.add(htail);
+  var vtail=new THREE.Mesh(new THREE.BoxGeometry(.22,3.2,2.2),wm);
+  vtail.position.set(0,1.4,4.8);g.add(vtail);
+  // Cockpit bubble at front
   var ck=new THREE.Mesh(new THREE.BoxGeometry(1.5,1,2.5),new THREE.MeshLambertMaterial({color:0x88ccff,transparent:true,opacity:.6}));
-  ck.position.set(0,.7,3);g.add(ck);
+  ck.position.set(0,.7,-3);g.add(ck);
+  // Engine nacelle at nose
   var eng=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.9,12),new THREE.MeshLambertMaterial({color:0x777}));
-  eng.rotation.x=Math.PI/2;eng.position.set(0,0,5.2);g.add(eng);
+  eng.rotation.x=Math.PI/2;eng.position.set(0,0,-5.2);g.add(eng);
+  // Prop at very nose — faces -Z
   var prop=new THREE.Mesh(new THREE.BoxGeometry(4.8,.14,.28),new THREE.MeshLambertMaterial({color:0x1a1a1a}));
-  prop.position.set(0,0,5.8);prop.userData.P=1;g.add(prop);
+  prop.position.set(0,0,-5.8);prop.userData.P=1;g.add(prop);
   return g;
 }
 
 var dMesh=mkDrone(),pMesh=mkPlane();
 scene.add(dMesh,pMesh);pMesh.visible=false;
 
+// Camera offsets in craft local space (craft faces -Z, so -Z = forward, +Z = rear)
+var cOff={drone:new THREE.Vector3(0,.35,0), plane:new THREE.Vector3(0,.7,-2.5)};
+var cTilt={drone:-.22,plane:-.06};
+
 C={pos:new THREE.Vector3(0,0,0),vel:new THREE.Vector3(0,0,0),
-   rot:new THREE.Euler(0,0,0,'YXZ'),thr:0,crashed:false,stalling:false,mesh:dMesh};
+   rot:new THREE.Euler(0,0,0,'YXZ'),thr:0,crashed:false,stalling:false,
+   armed:false, mesh:dMesh};
 
 function initCraft(){
   var sh=ht(0,0);
   C.pos.set(0,sh+22,0);
   C.vel.set(0,0,MODE==='plane'?-18:0);
   C.rot.set(0,0,0);
-  C.thr=MODE==='plane'?.5:0;
+  C.thr=MODE==='plane'?.45:0;
   C.crashed=false;C.stalling=false;
+  // Only require arm when gamepad is connected
+  C.armed=(gpIdx<0);
   C.mesh=MODE==='drone'?dMesh:pMesh;
   dMesh.visible=MODE==='drone';pMesh.visible=MODE==='plane';
-  ge('crashed').style.display='none';
+  ge('crashlbl').style.display='none';
 }
 
 var keys={};
@@ -352,8 +381,15 @@ function getInp(){
   var gp=gps[gpIdx];
   if(gp&&gp.axes.length>=4){
     var a=gp.axes;
+    // Map axis range -1..+1 → 0..1
     var tv=a[axm.thr]||0;
-    thr=(tv+1)/2;if(axm.invT) thr=1-thr;
+    thr=(tv+1)/2;
+    if(axm.invT) thr=1-thr;
+    // Arm safety: require thr < 10% before craft responds
+    if(!C.armed){
+      if(thr<0.1) C.armed=true;
+      else thr=0;
+    }
     yaw=dz((a[axm.yaw]||0))*SENS;
     pit=dz((a[axm.pit]||0))*SENS*(axm.invP?-1:1);
     rol=dz((a[axm.rol]||0))*SENS;
@@ -373,23 +409,22 @@ function getInp(){
 
 var GV=-9.81;
 var _q=new THREE.Quaternion();
-var _v=new THREE.Vector3();
 
 function updateDrone(inp,dt){
   var thr=inp.thr,yaw=inp.yaw,pit=inp.pit,rol=inp.rol;
   C.thr=thr;
   var maxA=Math.PI/3.2;
+  // Angle mode: pitch & roll lerp to target angle, yaw is rate
   C.rot.x+=(pit*maxA-C.rot.x)*dt*7;
   C.rot.z+=(-rol*maxA-C.rot.z)*dt*7;
   C.rot.y-=yaw*2.2*dt;
   _q.setFromEuler(C.rot);
-  _v.set(0,1,0).applyQuaternion(_q);
+  var up=new THREE.Vector3(0,1,0).applyQuaternion(_q);
   var F=thr*30;
-  C.vel.x+=_v.x*F*dt;
-  C.vel.y+=(_v.y*F+GV)*dt;
-  C.vel.z+=_v.z*F*dt;
-  var drag=Math.pow(.72,dt);
-  C.vel.multiplyScalar(drag);
+  C.vel.x+=up.x*F*dt;
+  C.vel.y+=(up.y*F+GV)*dt;
+  C.vel.z+=up.z*F*dt;
+  C.vel.multiplyScalar(Math.pow(.72,dt));
   var spd=C.vel.length();
   if(spd>65) C.vel.multiplyScalar(65/spd);
   C.pos.addScaledVector(C.vel,dt);
@@ -403,17 +438,21 @@ function updatePlane(inp,dt){
   C.rot.y-=yaw*.6*dt;
   C.rot.x=Math.max(-1.15,Math.min(1.15,C.rot.x));
   _q.setFromEuler(C.rot);
+  // Craft faces -Z
   var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(_q);
   var upV=new THREE.Vector3(0,1,0).applyQuaternion(_q);
+  // Thrust along forward axis
   C.vel.addScaledVector(fwd,thr*38*dt);
+  // Gravity
   C.vel.y+=GV*dt;
+  // Lift proportional to forward airspeed
   var fspd=fwd.dot(C.vel);
   var lf=Math.min(Math.max(fspd/20,0),1);
   C.stalling=fspd<6;
   C.vel.addScaledVector(upV,lf*20*dt);
+  // Coordinated turn: bank causes yaw
   C.rot.y-=Math.sin(C.rot.z)*.85*dt;
-  var drag2=C.stalling?Math.pow(.42,dt):Math.pow(.9,dt);
-  C.vel.multiplyScalar(drag2);
+  C.vel.multiplyScalar(C.stalling?Math.pow(.42,dt):Math.pow(.9,dt));
   var spd=C.vel.length();
   if(spd>85) C.vel.multiplyScalar(85/spd);
   C.pos.addScaledVector(C.vel,dt);
@@ -434,26 +473,21 @@ function checkColl(){
 
 function crash(){
   if(C.crashed) return;
-  C.crashed=true;
-  C.vel.set(0,0,0);
-  ge('crashed').style.display='block';
+  C.crashed=true;C.vel.set(0,0,0);
+  ge('crashlbl').style.display='block';
   var fl=ge('flash');fl.style.opacity=.7;
   setTimeout(function(){fl.style.opacity=0;},180);
   setTimeout(initCraft,1500);
 }
 
-var cOff={drone:new THREE.Vector3(0,.35,.85),plane:new THREE.Vector3(0,.9,2.8)};
-var cTilt={drone:-.22,plane:-.06};
-
 function updateCam(){
   var off=cOff[MODE],tilt=cTilt[MODE];
   _q.setFromEuler(C.rot);
-  var wo=off.clone().applyQuaternion(_q);
-  cam.position.copy(C.pos).add(wo);
+  cam.position.copy(C.pos).add(off.clone().applyQuaternion(_q));
   var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(_q);
   var upV=new THREE.Vector3(0,1,0).applyQuaternion(_q);
-  var lt=cam.position.clone().add(fwd).addScaledVector(upV,tilt);
-  cam.lookAt(lt);cam.up.copy(upV);
+  cam.lookAt(cam.position.clone().add(fwd).addScaledVector(upV,tilt));
+  cam.up.copy(upV);
 }
 
 function updateHUD(){
@@ -465,6 +499,7 @@ function updateHUD(){
   ge('hmode').textContent=MODE==='drone'?'DRONE':'PLANE';
   ge('thrfill').style.height=(C.thr*100)+'%';
   ge('stallw').style.display=(MODE==='plane'&&C.stalling)?'block':'none';
+  ge('armw').style.display=(!C.armed&&gpIdx>=0)?'block':'none';
   var gps=navigator.getGamepads?navigator.getGamepads():[];
   var gp=gps[gpIdx];
   ge('hctrl').textContent=gp?'GP: '+gp.id.substring(0,26):'KB: keyboard mode';
@@ -520,7 +555,6 @@ function toggleSP(){
   sp.style.display=sp.style.display==='none'?'block':'none';
 }
 
-axm.invT=true;ge('ithr').checked=true;
 cam.position.set(60,70,180);cam.lookAt(0,20,0);
 requestAnimationFrame(loop);
 </script>
