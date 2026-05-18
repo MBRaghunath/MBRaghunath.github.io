@@ -433,26 +433,34 @@ function updateDrone(inp,dt){
 function updatePlane(inp,dt){
   var thr=inp.thr,yaw=inp.yaw,pit=inp.pit,rol=inp.rol;
   C.thr=thr;
+  // INVERTED pitch: pull stick down (pit>0) = nose up
+  C.rot.x-=pit*2.2*dt;
   C.rot.z-=rol*2.5*dt;
-  C.rot.x+=pit*1.8*dt;
   C.rot.y-=yaw*.6*dt;
   C.rot.x=Math.max(-1.15,Math.min(1.15,C.rot.x));
+  // Aerodynamic stability: self-damp rotation when stick is released
+  if(Math.abs(pit)<0.05) C.rot.x*=Math.pow(0.32,dt);
+  if(Math.abs(rol)<0.05) C.rot.z*=Math.pow(0.45,dt);
   _q.setFromEuler(C.rot);
-  // Craft faces -Z
   var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(_q);
   var upV=new THREE.Vector3(0,1,0).applyQuaternion(_q);
-  // Thrust along forward axis
+  // Thrust + gravity
   C.vel.addScaledVector(fwd,thr*38*dt);
-  // Gravity
   C.vel.y+=GV*dt;
-  // Lift proportional to forward airspeed
+  // Lift
   var fspd=fwd.dot(C.vel);
   var lf=Math.min(Math.max(fspd/20,0),1);
   C.stalling=fspd<6;
   C.vel.addScaledVector(upV,lf*20*dt);
-  // Coordinated turn: bank causes yaw
+  // Coordinated turn
   C.rot.y-=Math.sin(C.rot.z)*.85*dt;
-  C.vel.multiplyScalar(C.stalling?Math.pow(.42,dt):Math.pow(.9,dt));
+  // Aerodynamic grip: velocity progressively aligns to heading (kills the ice feel)
+  if(!C.stalling){
+    var vl=C.vel.length();
+    if(vl>1) C.vel.lerp(fwd.clone().multiplyScalar(vl),Math.min(dt*2.2,0.1));
+  }
+  // More drag than before — tighter, less floaty
+  C.vel.multiplyScalar(C.stalling?Math.pow(.42,dt):Math.pow(.8,dt));
   var spd=C.vel.length();
   if(spd>85) C.vel.multiplyScalar(85/spd);
   C.pos.addScaledVector(C.vel,dt);
