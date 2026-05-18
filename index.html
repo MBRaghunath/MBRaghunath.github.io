@@ -413,11 +413,10 @@ var _q=new THREE.Quaternion();
 function updateDrone(inp,dt){
   var thr=inp.thr,yaw=inp.yaw,pit=inp.pit,rol=inp.rol;
   C.thr=thr;
-  var maxA=Math.PI/3.2;
-  // Angle mode: pitch & roll lerp to target angle, yaw is rate
-  C.rot.x+=(pit*maxA-C.rot.x)*dt*7;
-  C.rot.z+=(-rol*maxA-C.rot.z)*dt*7;
-  C.rot.y-=yaw*2.2*dt;
+  // Acro / rate mode: sticks are pure rotation rate, no leveling, no limits
+  C.rot.x+=pit*4.5*SENS*dt;
+  C.rot.z-=rol*4.5*SENS*dt;
+  C.rot.y-=yaw*3.0*SENS*dt;
   _q.setFromEuler(C.rot);
   var up=new THREE.Vector3(0,1,0).applyQuaternion(_q);
   var F=thr*30;
