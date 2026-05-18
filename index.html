@@ -403,23 +403,43 @@ function updateDrone(inp,dt){
 function updatePlane(inp,dt){
   var thr=inp.thr,yaw=inp.yaw,pit=inp.pit,rol=inp.rol;
   C.thr=thr;
+
+  // Direct pilot input — no limits, allows loops
   C.rot.x-=pit*2.2*dt;
   C.rot.z-=rol*2.5*dt;
   C.rot.y-=yaw*.6*dt;
-  C.rot.x=Math.max(-1.15,Math.min(1.15,C.rot.x));
-  if(Math.abs(pit)<0.05) C.rot.x*=Math.pow(0.32,dt);
-  if(Math.abs(rol)<0.05) C.rot.z*=Math.pow(0.45,dt);
+
   _q.setFromEuler(C.rot);
   var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(_q);
   var upV=new THREE.Vector3(0,1,0).applyQuaternion(_q);
+
+  // Thrust + gravity
   C.vel.addScaledVector(fwd,thr*38*dt);
   C.vel.y+=GV*dt;
+
+  // Lift
   var fspd=fwd.dot(C.vel);
   var lf=Math.min(Math.max(fspd/20,0),1);
   C.stalling=fspd<6;
   C.vel.addScaledVector(upV,lf*20*dt);
+
+  // Natural aerodynamic stability — always present, scales with airspeed.
+  // Never binary, easily overpowered by stick input.
+  var stab=Math.min(Math.max(fspd/28,0),1.0);
+  // Pitch: horizontal tail returns nose toward trim (slight nose-up under power)
+  C.rot.x-=(C.rot.x-thr*0.06)*0.65*stab*dt;
+  // Roll: dihedral — gentle wings-level tendency, weaker than pitch
+  C.rot.z-=C.rot.z*0.3*stab*dt;
+
+  // Bank induces yaw (coordinated turn / weathervane)
   C.rot.y-=Math.sin(C.rot.z)*.85*dt;
-  if(!C.stalling){var vl=C.vel.length();if(vl>1)C.vel.lerp(fwd.clone().multiplyScalar(vl),Math.min(dt*2.2,.1));}
+
+  // Velocity aligns to heading — prevents sliding, not rubberbanding
+  if(!C.stalling){
+    var vl=C.vel.length();
+    if(vl>1) C.vel.lerp(fwd.clone().multiplyScalar(vl),Math.min(dt*2.2,.1));
+  }
+
   C.vel.multiplyScalar(C.stalling?Math.pow(.42,dt):Math.pow(.8,dt));
   var spd=C.vel.length();
   if(spd>85) C.vel.multiplyScalar(85/spd);
