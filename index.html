@@ -7,10 +7,11 @@ canvas{display:block;position:fixed;top:0;left:0}
 #overlay h1{font-size:clamp(1.6rem,5vw,2.8rem);color:#0ff;letter-spacing:5px;margin-bottom:6px;text-shadow:0 0 30px rgba(0,255,255,.35)}
 #overlay .sub{color:#555;font-size:12px;margin-bottom:10px}
 #safariWarn{background:rgba(255,120,0,.12);border:1px solid rgba(255,120,0,.4);color:#fa0;font-size:11px;padding:7px 14px;margin-bottom:14px;display:none}
-.mrow{display:flex;gap:12px;margin-bottom:20px}
-.mbtn{padding:12px 26px;font-size:16px;font-family:monospace;border:1.5px solid #0ff;background:transparent;color:#0ff;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.orow{display:flex;gap:12px;margin-bottom:12px}
+.rlabel{font-size:10px;color:#333;letter-spacing:2px;margin-bottom:6px;text-align:center}
+.mbtn{padding:12px 26px;font-size:15px;font-family:monospace;border:1.5px solid #0ff;background:transparent;color:#0ff;cursor:pointer;transition:all .15s;letter-spacing:1px}
 .mbtn:hover,.mbtn.on{background:#0ff;color:#000}
-.gbtn{padding:10px 40px;font-size:15px;font-family:monospace;border:1.5px solid #fff;background:transparent;color:#fff;cursor:pointer;letter-spacing:2px}
+.gbtn{padding:10px 40px;font-size:15px;font-family:monospace;border:1.5px solid #fff;background:transparent;color:#fff;cursor:pointer;letter-spacing:2px;margin-top:8px}
 .gbtn:hover{background:#fff;color:#000}
 #cstat{font-size:11px;margin-bottom:16px;padding:5px 14px;border:1px solid #222}
 .con{color:#0f0!important}.disc{color:#fa0}
@@ -25,15 +26,15 @@ canvas{display:block;position:fixed;top:0;left:0}
 #xh{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:18px;height:18px;border:1.5px solid rgba(0,255,255,.4);border-radius:50%}
 #stallw{position:absolute;top:calc(50% + 22px);left:50%;transform:translateX(-50%);color:#f80;font-size:13px;display:none;letter-spacing:1px}
 #armw{position:absolute;top:calc(50% + 22px);left:50%;transform:translateX(-50%);color:#ff0;font-size:12px;display:none;letter-spacing:1px;text-align:center}
+#camtoggle{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.5);border:1px solid #333;color:#666;font-family:monospace;font-size:11px;padding:4px 10px;cursor:pointer;pointer-events:all}
+#camtoggle:hover{border-color:#0ff;color:#0ff}
 .hbc{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:10px;color:#2a2a2a}
 #sptoggle{position:fixed;top:10px;right:10px;background:rgba(0,0,0,.7);border:1px solid #222;color:#444;font-family:monospace;font-size:11px;padding:5px 10px;cursor:pointer;z-index:51;display:none}
 #sptoggle:hover{border-color:#0ff;color:#0ff}
 #spanel{position:fixed;top:0;right:0;width:260px;height:100%;background:rgba(0,0,0,.92);color:#ccc;font-family:monospace;font-size:11px;padding:14px;z-index:50;display:none;border-left:1px solid #1a1a1a;overflow-y:auto}
 #spanel h2{color:#0ff;font-size:12px;margin-bottom:14px;letter-spacing:1px}
-.sr{margin-bottom:10px}
-.sr label{display:block;color:#666;margin-bottom:3px}
-.sr input[type=range]{width:100%;accent-color:#0ff}
-.sr b{color:#0ee}
+.sr{margin-bottom:10px}.sr label{display:block;color:#666;margin-bottom:3px}
+.sr input[type=range]{width:100%;accent-color:#0ff}.sr b{color:#0ee}
 #adbg{margin-top:12px;color:#333;font-size:10px;white-space:pre;line-height:1.6;min-height:64px}
 .cpanel{margin-top:10px;width:100%;padding:6px;font-family:monospace;background:transparent;border:1px solid #222;color:#555;cursor:pointer;font-size:11px}
 .cpanel:hover{border-color:#0ff;color:#0ff}
@@ -45,16 +46,22 @@ canvas{display:block;position:fixed;top:0;left:0}
 <div id="overlay">
   <h1>FPV OPEN WORLD</h1>
   <div class="sub">Open world · Radiomaster Pocket ready · Just fly</div>
-  <div id="safariWarn">⚠ Safari does not support the Gamepad API — use Chrome or Firefox for controller support</div>
+  <div id="safariWarn">⚠ Safari doesn't support Gamepad API — use Chrome or Firefox for controller</div>
   <div id="cstat" class="disc">⚡ Connect Radiomaster → USB Joystick mode → press a stick</div>
-  <div class="mrow">
+  <div class="rlabel">CRAFT</div>
+  <div class="orow">
     <button class="mbtn on" id="bd" onclick="setMode('drone')">DRONE</button>
     <button class="mbtn" id="bp" onclick="setMode('plane')">PLANE</button>
   </div>
+  <div class="rlabel">CAMERA</div>
+  <div class="orow">
+    <button class="mbtn on" id="bfpv" onclick="setCamMode('fpv')">FPV</button>
+    <button class="mbtn" id="b3rd" onclick="setCamMode('3rd')">3RD PERSON</button>
+  </div>
   <button class="gbtn" onclick="startGame()">▶  FLY</button>
   <div class="kh">
-    SPACE / SHIFT = throttle up / down &nbsp;·&nbsp; W S = pitch &nbsp;·&nbsp; A D = roll &nbsp;·&nbsp; Q E = yaw<br>
-    R = respawn &nbsp;·&nbsp; TAB = controller map &nbsp;·&nbsp; ESC = menu
+    SPACE/SHIFT = throttle &nbsp;·&nbsp; WASD = pitch/roll &nbsp;·&nbsp; Q/E = yaw<br>
+    R = respawn &nbsp;·&nbsp; C = toggle camera &nbsp;·&nbsp; TAB = controller map &nbsp;·&nbsp; ESC = menu
   </div>
 </div>
 
@@ -66,19 +73,20 @@ canvas{display:block;position:fixed;top:0;left:0}
     <div class="hval" id="hthr">THR: 0%</div>
     <div id="hctrl" class="hctrl"></div>
   </div>
+  <button id="camtoggle" onclick="setCamMode(CAMMODE==='fpv'?'3rd':'fpv')">CAM: FPV</button>
   <div id="thrbar"><div id="thrfill"></div></div>
   <div id="xh"></div>
   <div id="stallw">⚠ STALL</div>
   <div id="armw">LOWER THROTTLE TO ARM</div>
   <div id="crashlbl">CRASHED</div>
-  <div class="hbc">R=Respawn · ESC=Menu · TAB=Settings</div>
+  <div class="hbc">R=Respawn · C=Camera · ESC=Menu · TAB=Settings</div>
 </div>
 
 <button id="sptoggle" onclick="toggleSP()">⚙ MAP</button>
 
 <div id="spanel">
   <h2>CONTROLLER MAP</h2>
-  <div style="color:#555;font-size:10px;margin-bottom:12px;line-height:1.6">Move each stick and watch axis values below to find the right numbers. Radiomaster defaults: Thr=2 Yaw=3 Pit=1 Rol=0</div>
+  <div style="color:#555;font-size:10px;margin-bottom:12px;line-height:1.6">Move sticks and watch axis values. Radiomaster defaults: Thr=2 Yaw=3 Pit=1 Rol=0</div>
   <div class="sr"><label>Throttle axis <b id="lthr">2</b></label>
     <input type="range" min="0" max="7" step="1" value="2" oninput="axm.thr=+this.value;document.getElementById('lthr').textContent=this.value">
   </div>
@@ -105,15 +113,14 @@ canvas{display:block;position:fixed;top:0;left:0}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// Safari warning
-if(/^((?!chrome|android).)*safari/i.test(navigator.userAgent)){
+if(/^((?!chrome|android).)*safari/i.test(navigator.userAgent))
   document.getElementById('safariWarn').style.display='block';
-}
 
-var MODE='drone', running=false, DZ=0.05, SENS=1.0;
+var MODE='drone', CAMMODE='fpv', running=false, DZ=0.05, SENS=1.0;
 var axm={thr:2,yaw:3,pit:1,rol:0,invT:false,invP:false};
 var gpIdx=-1;
 var C;
+var c3p=new THREE.Vector3(); // smoothed 3rd-person cam position
 
 const ge=s=>document.getElementById(s);
 const rnd=s=>{var v=Math.sin(s*127.1)*43758.55;return v-Math.floor(v)};
@@ -136,25 +143,21 @@ window.addEventListener('resize',()=>{
 });
 
 const sun=new THREE.DirectionalLight(0xfff8e0,1.2);
-sun.position.set(400,600,200);
-sun.castShadow=true;
+sun.position.set(400,600,200);sun.castShadow=true;
 sun.shadow.mapSize.set(1024,1024);
 sun.shadow.camera.left=-600;sun.shadow.camera.right=600;
-sun.shadow.camera.top=600;sun.shadow.camera.bottom=-600;
-sun.shadow.camera.far=2000;
+sun.shadow.camera.top=600;sun.shadow.camera.bottom=-600;sun.shadow.camera.far=2000;
 scene.add(sun);
 scene.add(new THREE.AmbientLight(0xc0d8f0,.8));
 
 function ht(x,z){
   var d=Math.min(1,Math.sqrt(x*x+z*z)/500);
   return Math.sin(x*.008)*20*d+Math.cos(z*.0075)*18*d
-        +Math.sin(x*.024+z*.019)*7
-        +Math.cos(x*.004+z*.011)*34*d
+        +Math.sin(x*.024+z*.019)*7+Math.cos(x*.004+z*.011)*34*d
         +Math.sin(x*.06+z*.045)*3.5-5;
 }
 
-var TS=2400,TSEGS=100;
-var tgeo=new THREE.PlaneGeometry(TS,TS,TSEGS,TSEGS);
+var tgeo=new THREE.PlaneGeometry(2400,2400,100,100);
 tgeo.rotateX(-Math.PI/2);
 var tpos=tgeo.attributes.position;
 var cols=new Float32Array(tpos.count*3);
@@ -171,23 +174,16 @@ for(var i=0;i<tpos.count;i++){
 }
 tgeo.setAttribute('color',new THREE.BufferAttribute(cols,3));
 tgeo.computeVertexNormals();
-var tmesh=new THREE.Mesh(tgeo,new THREE.MeshLambertMaterial({vertexColors:true}));
-tmesh.receiveShadow=true;
-scene.add(tmesh);
+scene.add(new THREE.Mesh(tgeo,new THREE.MeshLambertMaterial({vertexColors:true})));
 
-var waterMesh=new THREE.Mesh(
-  new THREE.PlaneGeometry(2400,2400).rotateX(-Math.PI/2),
-  new THREE.MeshLambertMaterial({color:0x1a5888,transparent:true,opacity:.72})
-);
-waterMesh.position.y=-3.5;
-scene.add(waterMesh);
+var wm=new THREE.Mesh(new THREE.PlaneGeometry(2400,2400).rotateX(-Math.PI/2),
+  new THREE.MeshLambertMaterial({color:0x1a5888,transparent:true,opacity:.72}));
+wm.position.y=-3.5;scene.add(wm);
 
 var trkM=new THREE.MeshLambertMaterial({color:0x5c3d1e});
-var lfM=[
-  new THREE.MeshLambertMaterial({color:0x1a6518}),
-  new THREE.MeshLambertMaterial({color:0x226020}),
-  new THREE.MeshLambertMaterial({color:0x2a7a25})
-];
+var lfM=[new THREE.MeshLambertMaterial({color:0x1a6518}),
+         new THREE.MeshLambertMaterial({color:0x226020}),
+         new THREE.MeshLambertMaterial({color:0x2a7a25})];
 function mkTree(x,z){
   var g=new THREE.Group();
   var tk=new THREE.Mesh(new THREE.CylinderGeometry(.3,.5,4,6),trkM);
@@ -196,8 +192,7 @@ function mkTree(x,z){
     var lv=new THREE.Mesh(new THREE.ConeGeometry(3.1-i*.65,4,7),lfM[i]);
     lv.position.y=4+i*2.6;g.add(lv);
   }
-  g.position.set(x,ht(x,z),z);
-  return g;
+  g.position.set(x,ht(x,z),z);return g;
 }
 for(var i=0;i<320;i++){
   var a=rnd(i*3.7)*Math.PI*2,d=90+rnd(i*7.3)*880;
@@ -223,28 +218,21 @@ for(var i=0;i<28;i++){
 var rcols=[0xff5500,0x00aaff,0xff00cc,0x00ff88,0xffee00,0xff2244,0x44ffee];
 function mkRing(x,y,z,r,rx,ry,rz,ci){
   var col=rcols[ci%rcols.length];
-  var m=new THREE.Mesh(
-    new THREE.TorusGeometry(r,.8,12,36),
-    new THREE.MeshLambertMaterial({color:col,emissive:col,emissiveIntensity:.5})
-  );
+  var m=new THREE.Mesh(new THREE.TorusGeometry(r,.8,12,36),
+    new THREE.MeshLambertMaterial({color:col,emissive:col,emissiveIntensity:.5}));
   m.position.set(x,y,z);
   if(rx)m.rotation.x=rx;if(ry)m.rotation.y=ry;if(rz)m.rotation.z=rz;
   scene.add(m);
 }
-var rdef=[
-  [80,10,60,10,0,0,0,0],[148,12,108,10,0,.3,0,0],[215,16,162,11,0,.6,0,0],
-  [282,20,200,12,0,.9,0,0],[345,24,228,12,0,1.2,0,0],
-  [-82,10,-72,10,0,0,0,1],[-152,14,-128,10,0,-.4,0,1],[-222,18,-188,11,0,-.8,0,1],
-  [52,28,-118,13,1.57,0,0,2],[-52,28,178,13,1.57,0,0,2],[122,34,-218,14,1.57,.5,0,2],
-  [0,62,-300,15,0,0,0,3],[110,72,-400,17,0,0,0,3],
-  [480,38,295,18,0,0,0,4],[-445,32,-198,17,0,0,0,4],
-  [198,22,-52,12,.28,0,.38,5],[-118,24,102,12,-.28,0,-.38,5],
-  [320,45,320,20,0,0,0,6],[-320,40,-280,19,0,0,0,6]
-];
-rdef.forEach(function(d){
-  var gy=ht(d[0],d[2]);
-  mkRing(d[0],Math.max(gy+8,gy+d[1]),d[2],d[3],d[4],d[5],d[6],d[7]);
-});
+[[80,10,60,10,0,0,0,0],[148,12,108,10,0,.3,0,0],[215,16,162,11,0,.6,0,0],
+ [282,20,200,12,0,.9,0,0],[345,24,228,12,0,1.2,0,0],
+ [-82,10,-72,10,0,0,0,1],[-152,14,-128,10,0,-.4,0,1],[-222,18,-188,11,0,-.8,0,1],
+ [52,28,-118,13,1.57,0,0,2],[-52,28,178,13,1.57,0,0,2],[122,34,-218,14,1.57,.5,0,2],
+ [0,62,-300,15,0,0,0,3],[110,72,-400,17,0,0,0,3],
+ [480,38,295,18,0,0,0,4],[-445,32,-198,17,0,0,0,4],
+ [198,22,-52,12,.28,0,.38,5],[-118,24,102,12,-.28,0,-.38,5],
+ [320,45,320,20,0,0,0,6],[-320,40,-280,19,0,0,0,6]
+].forEach(function(d){mkRing(d[0],Math.max(ht(d[0],d[2])+8,ht(d[0],d[2])+d[1]),d[2],d[3],d[4],d[5],d[6],d[7]);});
 
 var archM=new THREE.MeshLambertMaterial({color:0x998877});
 [[150,-250,24,18],[-220,130,20,15],[380,-100,26,22],[-380,280,22,17]].forEach(function(d){
@@ -255,12 +243,11 @@ var archM=new THREE.MeshLambertMaterial({color:0x998877});
   var tp=new THREE.Mesh(new THREE.BoxGeometry(aw+1.8,1.8,1.8),archM);
   tp.position.set(ax,agy+ah+.9,az);scene.add(tp);
 });
-
 var pilM=new THREE.MeshLambertMaterial({color:0x776655});
 [[300,250,8,40],[-300,-300,10,50],[420,-420,7,35],[185,405,9,45]].forEach(function(d){
   var px=d[0],pz=d[1],pr=d[2],ph=d[3],pgy=ht(px,pz);
-  var pl=new THREE.Mesh(new THREE.CylinderGeometry(pr*.55,pr,ph,8),pilM);
-  pl.position.set(px,pgy+ph/2,pz);scene.add(pl);
+  scene.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(pr*.55,pr,ph,8),pilM),
+    {position:new THREE.Vector3(px,pgy+ph/2,pz)}));
 });
 
 function mkDrone(){
@@ -280,7 +267,6 @@ function mkDrone(){
     var mb=new THREE.Mesh(new THREE.CylinderGeometry(.32,.28,.5,8),am);
     mb.position.set(a2[0]*2.35,.12,a2[1]*2.35);g.add(mb);
   });
-  // FPV cam faces -Z (forward)
   var fc=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.32),new THREE.MeshLambertMaterial({color:0xff9900}));
   fc.position.set(0,.12,-1.28);g.add(fc);
   var rl=new THREE.Mesh(new THREE.SphereGeometry(.1,5,4),new THREE.MeshLambertMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:1}));
@@ -294,32 +280,23 @@ function mkDrone(){
 function mkPlane(){
   var g=new THREE.Group();
   var fm=new THREE.MeshLambertMaterial({color:0xcc2020});
-  var wm=new THREE.MeshLambertMaterial({color:0xdd3030});
-  // Fuselage centred at origin
+  var wm2=new THREE.MeshLambertMaterial({color:0xdd3030});
   g.add(new THREE.Mesh(new THREE.BoxGeometry(1.8,1.6,9),fm));
-  // Nose cone points in -Z (forward)
   var nose=new THREE.Mesh(new THREE.ConeGeometry(.7,2,8),fm);
-  nose.rotation.x=-Math.PI/2;
-  nose.position.set(0,0,-5.5);g.add(nose);
-  // Main wings
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(18,.26,3.5),wm));
-  // Wing tips with dihedral
+  nose.rotation.x=-Math.PI/2;nose.position.set(0,0,-5.5);g.add(nose);
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(18,.26,3.5),wm2));
   [-1,1].forEach(function(s){
-    var wt=new THREE.Mesh(new THREE.BoxGeometry(4,.2,2.5),wm);
+    var wt=new THREE.Mesh(new THREE.BoxGeometry(4,.2,2.5),wm2);
     wt.position.set(s*9.5,.45,0);wt.rotation.z=s*-.18;g.add(wt);
   });
-  // Tail at +Z (rear)
-  var htail=new THREE.Mesh(new THREE.BoxGeometry(7,.22,2.2),wm);
+  var htail=new THREE.Mesh(new THREE.BoxGeometry(7,.22,2.2),wm2);
   htail.position.set(0,0,4.8);g.add(htail);
-  var vtail=new THREE.Mesh(new THREE.BoxGeometry(.22,3.2,2.2),wm);
+  var vtail=new THREE.Mesh(new THREE.BoxGeometry(.22,3.2,2.2),wm2);
   vtail.position.set(0,1.4,4.8);g.add(vtail);
-  // Cockpit bubble at front
   var ck=new THREE.Mesh(new THREE.BoxGeometry(1.5,1,2.5),new THREE.MeshLambertMaterial({color:0x88ccff,transparent:true,opacity:.6}));
   ck.position.set(0,.7,-3);g.add(ck);
-  // Engine nacelle at nose
   var eng=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.9,12),new THREE.MeshLambertMaterial({color:0x777}));
   eng.rotation.x=Math.PI/2;eng.position.set(0,0,-5.2);g.add(eng);
-  // Prop at very nose — faces -Z
   var prop=new THREE.Mesh(new THREE.BoxGeometry(4.8,.14,.28),new THREE.MeshLambertMaterial({color:0x1a1a1a}));
   prop.position.set(0,0,-5.8);prop.userData.P=1;g.add(prop);
   return g;
@@ -328,13 +305,12 @@ function mkPlane(){
 var dMesh=mkDrone(),pMesh=mkPlane();
 scene.add(dMesh,pMesh);pMesh.visible=false;
 
-// Camera offsets in craft local space (craft faces -Z, so -Z = forward, +Z = rear)
-var cOff={drone:new THREE.Vector3(0,.35,0), plane:new THREE.Vector3(0,.7,-2.5)};
+var cOff={drone:new THREE.Vector3(0,.35,0),plane:new THREE.Vector3(0,.7,-2.5)};
 var cTilt={drone:-.22,plane:-.06};
 
 C={pos:new THREE.Vector3(0,0,0),vel:new THREE.Vector3(0,0,0),
    rot:new THREE.Euler(0,0,0,'YXZ'),thr:0,crashed:false,stalling:false,
-   armed:false, mesh:dMesh};
+   armed:false,mesh:dMesh};
 
 function initCraft(){
   var sh=ht(0,0);
@@ -343,11 +319,14 @@ function initCraft(){
   C.rot.set(0,0,0);
   C.thr=MODE==='plane'?.45:0;
   C.crashed=false;C.stalling=false;
-  // Only require arm when gamepad is connected
   C.armed=(gpIdx<0);
   C.mesh=MODE==='drone'?dMesh:pMesh;
   dMesh.visible=MODE==='drone';pMesh.visible=MODE==='plane';
   ge('crashlbl').style.display='none';
+  // Seed 3rd-person cam behind spawn
+  var fInit=new THREE.Vector3(0,0,-1);fInit.y=0;fInit.normalize();
+  var dist3=MODE==='plane'?22:12;
+  c3p.copy(C.pos).addScaledVector(fInit,-dist3).add(new THREE.Vector3(0,6,0));
 }
 
 var keys={};
@@ -355,6 +334,7 @@ document.addEventListener('keydown',function(e){
   keys[e.code]=true;
   if(e.code==='Escape'&&running) showMenu();
   if(e.code==='KeyR') initCraft();
+  if(e.code==='KeyC') setCamMode(CAMMODE==='fpv'?'3rd':'fpv');
   if(e.code==='Tab'){e.preventDefault();toggleSP();}
 });
 document.addEventListener('keyup',function(e){keys[e.code]=false});
@@ -370,10 +350,7 @@ window.addEventListener('gamepaddisconnected',function(){
   ge('cstat').className='disc';
 });
 
-function dz(v){
-  if(Math.abs(v)<DZ) return 0;
-  return Math.sign(v)*(Math.abs(v)-DZ)/(1-DZ);
-}
+function dz(v){if(Math.abs(v)<DZ)return 0;return Math.sign(v)*(Math.abs(v)-DZ)/(1-DZ);}
 
 function getInp(){
   var thr=C.thr,yaw=0,pit=0,rol=0;
@@ -381,15 +358,9 @@ function getInp(){
   var gp=gps[gpIdx];
   if(gp&&gp.axes.length>=4){
     var a=gp.axes;
-    // Map axis range -1..+1 → 0..1
     var tv=a[axm.thr]||0;
-    thr=(tv+1)/2;
-    if(axm.invT) thr=1-thr;
-    // Arm safety: require thr < 10% before craft responds
-    if(!C.armed){
-      if(thr<0.1) C.armed=true;
-      else thr=0;
-    }
+    thr=(tv+1)/2;if(axm.invT) thr=1-thr;
+    if(!C.armed){if(thr<0.1)C.armed=true;else thr=0;}
     yaw=dz((a[axm.yaw]||0))*SENS;
     pit=dz((a[axm.pit]||0))*SENS*(axm.invP?-1:1);
     rol=dz((a[axm.rol]||0))*SENS;
@@ -432,33 +403,23 @@ function updateDrone(inp,dt){
 function updatePlane(inp,dt){
   var thr=inp.thr,yaw=inp.yaw,pit=inp.pit,rol=inp.rol;
   C.thr=thr;
-  // INVERTED pitch: pull stick down (pit>0) = nose up
   C.rot.x-=pit*2.2*dt;
   C.rot.z-=rol*2.5*dt;
   C.rot.y-=yaw*.6*dt;
   C.rot.x=Math.max(-1.15,Math.min(1.15,C.rot.x));
-  // Aerodynamic stability: self-damp rotation when stick is released
   if(Math.abs(pit)<0.05) C.rot.x*=Math.pow(0.32,dt);
   if(Math.abs(rol)<0.05) C.rot.z*=Math.pow(0.45,dt);
   _q.setFromEuler(C.rot);
   var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(_q);
   var upV=new THREE.Vector3(0,1,0).applyQuaternion(_q);
-  // Thrust + gravity
   C.vel.addScaledVector(fwd,thr*38*dt);
   C.vel.y+=GV*dt;
-  // Lift
   var fspd=fwd.dot(C.vel);
   var lf=Math.min(Math.max(fspd/20,0),1);
   C.stalling=fspd<6;
   C.vel.addScaledVector(upV,lf*20*dt);
-  // Coordinated turn
   C.rot.y-=Math.sin(C.rot.z)*.85*dt;
-  // Aerodynamic grip: velocity progressively aligns to heading (kills the ice feel)
-  if(!C.stalling){
-    var vl=C.vel.length();
-    if(vl>1) C.vel.lerp(fwd.clone().multiplyScalar(vl),Math.min(dt*2.2,0.1));
-  }
-  // More drag than before — tighter, less floaty
+  if(!C.stalling){var vl=C.vel.length();if(vl>1)C.vel.lerp(fwd.clone().multiplyScalar(vl),Math.min(dt*2.2,.1));}
   C.vel.multiplyScalar(C.stalling?Math.pow(.42,dt):Math.pow(.8,dt));
   var spd=C.vel.length();
   if(spd>85) C.vel.multiplyScalar(85/spd);
@@ -469,8 +430,7 @@ function checkColl(){
   var gh=ht(C.pos.x,C.pos.z);
   if(C.pos.y<gh+1.5){
     if(C.vel.length()>10){crash();return;}
-    C.pos.y=gh+1.5;
-    if(C.vel.y<0) C.vel.y=0;
+    C.pos.y=gh+1.5;if(C.vel.y<0)C.vel.y=0;
   }
   var B=1150;
   if(Math.abs(C.pos.x)>B){C.vel.x*=-.5;C.pos.x=Math.sign(C.pos.x)*B;}
@@ -479,7 +439,7 @@ function checkColl(){
 }
 
 function crash(){
-  if(C.crashed) return;
+  if(C.crashed)return;
   C.crashed=true;C.vel.set(0,0,0);
   ge('crashlbl').style.display='block';
   var fl=ge('flash');fl.style.opacity=.7;
@@ -488,13 +448,34 @@ function crash(){
 }
 
 function updateCam(){
-  var off=cOff[MODE],tilt=cTilt[MODE];
   _q.setFromEuler(C.rot);
-  cam.position.copy(C.pos).add(off.clone().applyQuaternion(_q));
-  var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(_q);
-  var upV=new THREE.Vector3(0,1,0).applyQuaternion(_q);
-  cam.lookAt(cam.position.clone().add(fwd).addScaledVector(upV,tilt));
-  cam.up.copy(upV);
+  if(CAMMODE==='fpv'){
+    var off=cOff[MODE],tilt=cTilt[MODE];
+    cam.position.copy(C.pos).add(off.clone().applyQuaternion(_q));
+    var fwd=new THREE.Vector3(0,0,-1).applyQuaternion(_q);
+    var upV=new THREE.Vector3(0,1,0).applyQuaternion(_q);
+    cam.lookAt(cam.position.clone().add(fwd).addScaledVector(upV,tilt));
+    cam.up.copy(upV);
+  } else {
+    // 3rd person: chase cam, horizontally projected heading, world-up
+    var fwd3=new THREE.Vector3(0,0,-1).applyQuaternion(_q);
+    fwd3.y=0;
+    var fl2=fwd3.length();
+    if(fl2<0.05) fwd3.set(0,0,-1); else fwd3.divideScalar(fl2);
+    var dist=MODE==='plane'?22:12;
+    var height=MODE==='plane'?8:6;
+    var tgt=C.pos.clone().addScaledVector(fwd3,-dist).add(new THREE.Vector3(0,height,0));
+    // Keep cam above terrain
+    var gh=ht(tgt.x,tgt.z);
+    if(tgt.y<gh+2.5) tgt.y=gh+2.5;
+    // Smooth follow — looser for drone (acro flips), tighter for plane
+    var lag=MODE==='drone'?0.07:0.09;
+    c3p.lerp(tgt,lag);
+    cam.position.copy(c3p);
+    // Look slightly above craft centre for a nicer angle
+    cam.lookAt(C.pos.clone().add(new THREE.Vector3(0,1.5,0)));
+    cam.up.set(0,1,0);
+  }
 }
 
 function updateHUD(){
@@ -503,10 +484,13 @@ function updateHUD(){
   ge('hspd').textContent='SPD: '+spd+' m/s';
   ge('halt').textContent='ALT: '+alt+' m';
   ge('hthr').textContent='THR: '+(C.thr*100).toFixed(0)+'%';
-  ge('hmode').textContent=MODE==='drone'?'DRONE':'PLANE';
+  ge('hmode').textContent=MODE==='drone'?'DRONE (ACRO)':'PLANE';
   ge('thrfill').style.height=(C.thr*100)+'%';
   ge('stallw').style.display=(MODE==='plane'&&C.stalling)?'block':'none';
   ge('armw').style.display=(!C.armed&&gpIdx>=0)?'block':'none';
+  ge('camtoggle').textContent='CAM: '+(CAMMODE==='fpv'?'FPV':'3RD');
+  // Hide crosshair in 3rd person
+  ge('xh').style.display=CAMMODE==='fpv'?'block':'none';
   var gps=navigator.getGamepads?navigator.getGamepads():[];
   var gp=gps[gpIdx];
   ge('hctrl').textContent=gp?'GP: '+gp.id.substring(0,26):'KB: keyboard mode';
@@ -532,8 +516,7 @@ function loop(ts){
     MODE==='drone'?updateDrone(inp,dt):updatePlane(inp,dt);
     checkColl();
   }
-  C.mesh.position.copy(C.pos);
-  C.mesh.rotation.copy(C.rot);
+  C.mesh.position.copy(C.pos);C.mesh.rotation.copy(C.rot);
   updateCam();updateHUD();animParts(dt);
   renderer.render(scene,cam);
 }
@@ -542,6 +525,11 @@ function setMode(m){
   MODE=m;
   ge('bd').classList.toggle('on',m==='drone');
   ge('bp').classList.toggle('on',m==='plane');
+}
+function setCamMode(m){
+  CAMMODE=m;
+  ge('bfpv').classList.toggle('on',m==='fpv');
+  ge('b3rd').classList.toggle('on',m==='3rd');
 }
 function startGame(){
   initCraft();
